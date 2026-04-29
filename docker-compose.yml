@@ -1,0 +1,61 @@
+services:
+	db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTRGRES_USER: ${POSTRGRES_USER}
+      POSTRGRES_PWD: $POSTRGRES_PWD
+      POSTRGRES_DB: ${POSTRGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/postgres_data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    restart: always
+    depends-on:
+      - backend
+    ports:
+      - "5173:5173"
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
