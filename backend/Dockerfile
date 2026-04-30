@@ -14,4 +14,4 @@ RUN npm install
 COPY . .
 
 # 6. Lancer le serveur
-CMD ["node", "server.js"]
+CMD ["npx", "nodemon", "--ext", "ts-node", "src/index.ts"]
