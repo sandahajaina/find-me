@@ -1,5 +1,5 @@
 # 1. Image Node officielle LTS
-FROM node:lts
+FROM node:lts-alpine
 
 # 2. Répertoire de travail dans le conteneur
 WORKDIR /app
@@ -13,5 +13,6 @@ RUN npm install
 # 5. Copier le reste du code
 COPY . .
 
-# 6. Lancer le serveur
-CMD ["npx", "nodemon", "--ext", "ts-node", "src/index.ts"]
+# 6. Lancer le serveur de développement Vite
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host"]

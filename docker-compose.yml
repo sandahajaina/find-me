@@ -1,18 +1,16 @@
 services:
-	db:
-    image: postgres
+  db:
+    image: postgres:16
     restart: always
     env_file:
       - .env
-    environment:
-      POSTRGRES_USER: ${POSTRGRES_USER}
-      POSTRGRES_PWD: $POSTRGRES_PWD
-      POSTRGRES_DB: ${POSTRGRES_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/postgres_data
+      - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
+    ports:
+      - "5433:5432"
 
   adminer:
     image: adminer
@@ -28,7 +26,7 @@ services:
     build:
       context: ./backend
       dockerfile: dockerfile
-    restart: always
+    restart: unless-stopped
     depends_on:
       - db
     env_file:
@@ -45,13 +43,16 @@ services:
     build:
       context: ./frontend
       dockerfile: dockerfile
-    restart: always
-    depends-on:
+    restart: unless-stopped
+    depends_on:
       - backend
     ports:
       - "5173:5173"
     networks:
       - app-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   postgres_data:
