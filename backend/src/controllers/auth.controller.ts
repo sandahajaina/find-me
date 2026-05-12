@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { RegisterBody } from "../types";
 import * as authService from '../services/auth.service';
+import { AppError } from "../utils/AppError";
 
 function isValidEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -53,7 +54,7 @@ export async function register(
             });
         }
 
-        const user = await authService.register({
+        await authService.register({
             username,
             email,
             last_name,
@@ -62,11 +63,15 @@ export async function register(
         });
 
         return res.status(201).json({
-            message: "User registered successfully",
-            user
+            message: "User registered successfully"
         });
 
     } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message : error.message
+            });
+        }
         console.error(error);
         return res.status(500).json({
             message: "Internal server error"
