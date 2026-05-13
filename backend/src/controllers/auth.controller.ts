@@ -54,7 +54,7 @@ export async function register(
             });
         }
 
-        await authService.register({
+        await authService.registerUser({
             username,
             email,
             last_name,
