@@ -3,6 +3,7 @@ import { RegisterBody } from "../types";
 import { AppError } from "../utils/AppError";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import transporter from "../config/mailer";
 
 export async function registerUser(user: RegisterBody) {
     const { username, email, last_name, first_name, password } = user;
@@ -25,7 +26,7 @@ export async function registerUser(user: RegisterBody) {
     }
 
     // hashing pwd
-    const saltRounds = 10;
+    const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const emailToken = crypto.randomBytes(32).toString("hex");
 
@@ -35,7 +36,7 @@ export async function registerUser(user: RegisterBody) {
     // console.log("Inserer en BDD");
     const insertUserQuery = `
         INSERT INTO users(
-            username, email, last_name, first_name, password, email_token, email_token_expires_at
+            username, email, last_name, first_name, password_hash, email_token, email_token_expires_at
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING id
@@ -50,7 +51,46 @@ export async function registerUser(user: RegisterBody) {
         email_token_expires_at
     ]);
 
-    console.log("Envoyer email");
-    // Ajoute à la fin
+    // console.log("Envoyer email");
+
+    const verificationLink = `${process.env.FRONTEND_URL}/auth/verify?token=${emailToken}`;
+
+    await transporter.sendMail({
+        from: '"Matcha" <noreply@matcha.com>',
+        to: normalizedEmail,
+        subject: "Verify your account",
+        html: `<h1>Welcome ${username}!</h1>
+            <a href=${verificationLink}>Verify my account</a>`
+    });
+
     return { id: registeredUser.rows[0].id };
+}
+
+export async function verifyEmail(token:string) {
+    const verifyTokenQuery = `
+        SELECT id, email_token_expires_at
+        FROM users
+        WHERE email_token = $1 AND is_verified = false
+    `;
+    const verifiedUser = await pool.query(verifyTokenQuery, [token]);
+    if (verifiedUser.rows.length === 0) {
+        throw new AppError("Bad token", 400);
+    }
+    const user = verifiedUser.rows[0];
+    const expiresAt = new Date(user.email_token_expires_at);
+
+    if (Date.now() > expiresAt.getTime()) {
+        throw new AppError("Token expired", 400);
+    }
+
+    const updateUserDataQuery = `
+        UPDATE users
+        SET is_verified = true,
+        email_token = null,
+        email_token_expires_at = null
+        WHERE id = $1
+    `;
+
+    await pool.query(updateUserDataQuery, [user.id]);
+    return {id : user.id};
 }

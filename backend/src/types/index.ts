@@ -11,3 +11,7 @@ export interface UserRow {
     username: string,
     email: string
 }
+
+export interface VerifyEmailParams {
+  token: string;
+}
