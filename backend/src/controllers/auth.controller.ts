@@ -102,3 +102,7 @@ export async function verifyEmail(req: Request<VerifyEmailParams>, res: Response
         });
     }
 }
+
+export async function login(req: Request, res: Response) {
+    
+}
