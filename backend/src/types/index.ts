@@ -15,3 +15,14 @@ export interface UserRow {
 export interface VerifyEmailParams {
   token: string;
 }
+
+export interface LoginBody {
+    username: string;
+    password: string;
+}
+
+export interface TokenPayload {
+    id: number,
+    username: string,
+    is_verified: boolean,
+}

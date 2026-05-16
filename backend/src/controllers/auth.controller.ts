@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { RegisterBody, VerifyEmailParams } from "../types";
+import { LoginBody, RegisterBody, VerifyEmailParams } from "../types";
 import * as authService from '../services/auth.service';
 import { AppError } from "../utils/AppError";
 
@@ -103,6 +103,34 @@ export async function verifyEmail(req: Request<VerifyEmailParams>, res: Response
     }
 }
 
-export async function login(req: Request, res: Response) {
-    
+export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) {
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({
+                message: "Missing fields"
+            })
+        }
+        const user = await authService.loginUser({username, password});
+        res.cookie(
+            'token', user.tokenJwt, {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+        return res.status(200).json({
+            message: `Welcome ${user.username}`
+        });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
 }

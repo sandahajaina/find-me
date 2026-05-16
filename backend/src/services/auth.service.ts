@@ -1,9 +1,10 @@
 import pool from "../config/db";
-import { RegisterBody } from "../types";
+import { LoginBody, RegisterBody } from "../types";
 import { AppError } from "../utils/AppError";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import transporter from "../config/mailer";
+import * as utils from "../utils/auth.utils";
 
 export async function registerUser(user: RegisterBody) {
     const { username, email, last_name, first_name, password } = user;
@@ -93,4 +94,43 @@ export async function verifyEmail(token:string) {
 
     await pool.query(updateUserDataQuery, [user.id]);
     return {id : user.id};
+}
+
+export async function loginUser(params: LoginBody) {
+    const {username, password} = params;
+    const checkUserQuery = `
+        SELECT id, password_hash, is_verified 
+        FROM users 
+        WHERE username = $1
+    `;
+    const result = await pool.query(checkUserQuery, [username]);
+    if (result.rows.length === 0) {
+        throw new AppError("Invalid credentials", 400);
+    }
+    const user = result.rows[0];
+    if (!user.is_verified) {
+        throw new AppError("Please verify your account", 400);
+    }
+    const hashedPassword = user.password_hash;
+    const match =  await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+        throw new AppError("Invalid credentials", 400);
+    }
+
+    const tokenJwt = utils.genererToken({
+        id: user.id, 
+        username,
+        is_verified: user.is_verified,
+    });
+
+    const updateUserDataQuery = `
+        UPDATE users
+        SET is_online = true,
+        last_seen_at = NOW()
+        WHERE id = $1
+    `;
+    await pool.query(updateUserDataQuery, [user.id]);
+
+    return {id: user.id, username, tokenJwt};
 }
