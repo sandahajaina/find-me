@@ -26,3 +26,8 @@ export interface TokenPayload {
     username: string,
     is_verified: boolean,
 }
+
+export interface ForgotPasswordBody {
+    username: string;
+    email: string;
+}
