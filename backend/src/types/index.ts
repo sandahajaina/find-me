@@ -1,3 +1,15 @@
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: number;
+        username: string;
+        is_verified: boolean;
+      }
+    }
+  }
+}
+
 export interface RegisterBody {
     username: string;
     email: string;

@@ -134,3 +134,11 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
         });
     }
 }
+
+export async function logoutUser(req: Request, res: Response) {
+
+    res.cookie('token', '', {
+        httpOnly: true,
+        maxAge: 0
+    });
+}
