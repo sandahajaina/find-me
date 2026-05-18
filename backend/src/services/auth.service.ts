@@ -122,7 +122,7 @@ export async function loginUser(params: LoginBody) {
         id: user.id, 
         username,
         is_verified: user.is_verified,
-    });
+    }, "7d");
 
     const updateUserDataQuery = `
         UPDATE users
