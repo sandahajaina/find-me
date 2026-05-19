@@ -141,18 +141,16 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
 export async function forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, res: Response) {
     try {
         const { username, email } = req.body;
-
-        // CHECK IF USER EXISTS
         const resetToken = utils.genererToken({
             username
         }, "15m");
-        const resetURL = 'http://localhost:3000/reset-password?token=${resetToken}';
+        const resetURL = `http://localhost:3000/reset-password?token=${resetToken}`;
         
         const mailOptions = {
             to: email,
             from: process.env.EMAIL,
             subject: 'Password reset request',
-            text: 'Click on this if you want to resest your password ${resetURL}'
+            text: `Click on this if you want to resest your password ${resetURL}`
         };
 
         await transporter.sendMail(mailOptions);
@@ -172,21 +170,49 @@ export async function forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, r
     }
 }
 
-export async function logout(res: Response) {
-    // TO DO: CHECK IF USER IS LOGGED
-    res.clearCookie('token', {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'strict',
-    });
-    return res.status(200).json({
-        message: `User logged out`
-    });
-}
+// export async function resetPassword(req: Request, res: Response) {
+//     const { id, token } = req.params;
+//     const { password } = req.body;
+    
+    
+// }
 
-export async function resetPassword(req: Request, res: Response) {
-    const { id, token } = req.params;
-    const { password } = req.body;
+export async function logout(req: Request,res: Response) {
 
+    try {
+        const { username, password } = req.body;
+        if (!username || !password) {
+            return res.status(400).json({
+                message: "Missing fields"
+            })
+        }
+        const user = await authService.loginUser({ username, password });
+        res.clearCookie('token', {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+        });
+        return res.status(200).json({
+            message: `User logged out`
+        });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
 
+    // res.clearCookie('token', {
+    //     httpOnly: true,
+    //     secure: false,
+    //     sameSite: 'strict',
+    // });
+    // return res.status(200).json({
+    //     message: `User logged out`
+    // });
 }
