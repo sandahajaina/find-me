@@ -9,6 +9,7 @@ export function authentifier (req: Request, res: Response, next: NextFunction): 
         res.status(401).json({
             message: "Access denied. No token"
         });
+        return;
     }
 
     try {

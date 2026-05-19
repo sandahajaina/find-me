@@ -136,9 +136,11 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
 }
 
 export async function logoutUser(req: Request, res: Response) {
-
     res.cookie('token', '', {
         httpOnly: true,
         maxAge: 0
+    });
+    return res.status(200).json({
+        message: "User logged out successfully !"
     });
 }
