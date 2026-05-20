@@ -134,3 +134,14 @@ export async function loginUser(params: LoginBody) {
 
     return {id: user.id, username, tokenJwt};
 }
+
+export async function logoutUser(id : number) {
+    const logoutUserQuery = `
+        UPDATE users
+        SET is_online = false,
+        last_seen_at = NOW()
+        WHERE id = $1
+    `;
+    await pool.query(logoutUserQuery, [id]);
+    return {id};
+}

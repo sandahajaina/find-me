@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { LoginBody, RegisterBody, VerifyEmailParams } from "../types";
+import { LoginBody, RegisterBody, TokenPayload, VerifyEmailParams } from "../types";
 import * as authService from '../services/auth.service';
 import { AppError } from "../utils/AppError";
 
@@ -109,7 +109,7 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
         if (!username || !password) {
             return res.status(400).json({
                 message: "Missing fields"
-            })
+            });
         }
         const user = await authService.loginUser({username, password});
         res.cookie(
@@ -136,11 +136,31 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
 }
 
 export async function logoutUser(req: Request, res: Response) {
-    res.cookie('token', '', {
-        httpOnly: true,
-        maxAge: 0
-    });
-    return res.status(200).json({
-        message: "User logged out successfully !"
-    });
+
+    try {
+        res.cookie('token', '', {
+            httpOnly: true,
+            maxAge: 0
+        });
+        const {id} = req.user as TokenPayload;
+        if (!id) {
+            return res.status(400).json({
+                message: "Missing id"
+            });
+        }
+        await authService.logoutUser(id);
+        return res.status(200).json({
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
 }

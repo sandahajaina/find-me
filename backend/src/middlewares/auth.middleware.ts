@@ -12,8 +12,11 @@ export function authentifier (req: Request, res: Response, next: NextFunction): 
         return;
     }
 
+    if (!process.env.SECRET_JWT)
+        throw new Error("SECRET_JWT is missing");
+
     try {
-        const SECRET_KEY = process.env.SECRET_JWT!;
+        const SECRET_KEY = process.env.SECRET_JWT;
         const decoded = jwt.verify(token, SECRET_KEY) as TokenPayload;
 
         req.user = decoded;
