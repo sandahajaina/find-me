@@ -164,3 +164,11 @@ export async function logoutUser(req: Request, res: Response) {
         });
     }
 }
+
+export async function forgotPassword(req: Request, res: Response) {
+    
+}
+
+export async function resetPassword(req: Request, res: Response) {
+    
+}
