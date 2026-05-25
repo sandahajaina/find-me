@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { LoginBody, RegisterBody, TokenPayload, VerifyEmailParams } from "../types";
+import { ForgotPasswordBody, LoginBody, RegisterBody, ResetPasswordBody, TokenPayload, VerifyEmailParams } from "../types";
 import * as authService from '../services/auth.service';
 import { AppError } from "../utils/AppError";
 
@@ -165,10 +165,69 @@ export async function logoutUser(req: Request, res: Response) {
     }
 }
 
-export async function forgotPassword(req: Request, res: Response) {
-    
+export async function forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, res: Response) {
+    try {
+        const {email} = req.body;
+        if (!email) {
+            return res.status(400).json({ 
+                message: "Missing fields"
+            });
+        }
+        if (!isValidEmail(email)) {
+            return res.status(400).json({
+                message: "Invalid email format"
+            });
+        }
+        await authService.forgotPassword(email);
+        return res.status(200).json({
+            message: "If this email exists, a reset link has been sent"
+        });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
 }
 
-export async function resetPassword(req: Request, res: Response) {
-    
+export async function resetPassword(req: Request<{token: string}, {}, ResetPasswordBody>, res: Response) {
+    try {
+        const {password} = req.body;
+        const {token} = req.params;
+        if (!password) {
+            return res.status(400).json({ 
+                message: "Missing fields"
+            });
+        }
+
+        const passwordError = validatePassword(password);
+
+        if (passwordError) {
+            return res.status(400).json({
+                message: passwordError
+            });
+        }
+
+        await authService.resetPassword(token, password);
+
+        return res.status(200).json({
+            message: "Reset password succesfully"
+        });
+        
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
 }

@@ -38,3 +38,11 @@ export interface TokenPayload {
     username: string,
     is_verified: boolean,
 }
+
+export interface ResetPasswordBody  {
+    password: string;
+}
+
+export interface ForgotPasswordBody {
+    email: string;
+}

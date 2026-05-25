@@ -145,3 +145,69 @@ export async function logoutUser(id : number) {
     await pool.query(logoutUserQuery, [id]);
     return {id};
 }
+
+export async function forgotPassword(email:string) {
+    const searchUserByEmailQuery = `
+        SELECT id
+        FROM users
+        WHERE email = $1
+    `;
+    const {rows} = await pool.query(searchUserByEmailQuery, [email]);
+    if (rows.length === 0) {
+        return;
+    }
+    const user = rows[0];
+    const resetPasswordToken = crypto.randomBytes(32).toString("hex");
+    const tokenExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    const updateUserQuery = `
+        UPDATE users
+        SET reset_password_token = $1,
+        reset_password_expires_at = $2
+        WHERE id = $3
+    `;
+
+    await pool.query(updateUserQuery, [resetPasswordToken, tokenExpiresAt, user.id]);
+
+    const resetPasswordLink = `${process.env.FRONTEND_URL}/auth/verify?token=${resetPasswordToken}`;
+    await transporter.sendMail({
+        from: '"Matcha" <noreply@matcha.com>',
+        to: email,
+        subject: "Reset password",
+        html: `<h1>Click the link below</h1>
+            <a href=${resetPasswordLink}>Reset password</a>`
+    });
+
+    return {id: user.id};
+}
+
+export async function resetPassword(token: string ,password: string) {
+    const checkUserByTokenQuery = `
+        SELECT id, reset_password_expires_at
+        FROM users
+        WHERE reset_password_token = $1
+    `;
+    const verifiedUser = await pool.query(checkUserByTokenQuery, [token]);
+    if (verifiedUser.rows.length === 0) {
+        throw new AppError("Bad token", 400);
+    }
+    const user = verifiedUser.rows[0];
+    const expiresAt = new Date(user.reset_password_expires_at);
+
+    if (Date.now() > expiresAt.getTime()) {
+        throw new AppError("Token expired", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const updateUserDataQuery = `
+        UPDATE users
+        SET password_hash = $1,
+        reset_password_token = null,
+        reset_password_expires_at = null
+        WHERE id = $2
+    `;
+
+    await pool.query(updateUserDataQuery, [hashedPassword, user.id])
+    return {id: user.id};
+}
