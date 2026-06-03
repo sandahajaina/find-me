@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes'
 import cookieParser from "cookie-parser";
 
 if (!process.env.FRONTEND_URL)
@@ -14,9 +15,10 @@ app.use(cookieParser());
 
 app.use(cors({
     origin: process.env.FRONTEND_URL,
-    // credentials: true
+    credentials: true
 }));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 export default app;
