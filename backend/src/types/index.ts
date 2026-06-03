@@ -11,17 +11,17 @@ declare global {
 }
 
 export interface RegisterBody {
-    username: string;
-    email: string;
-    last_name: string;
-    first_name: string;
-    password: string;
+  username: string;
+  email: string;
+  last_name: string;
+  first_name: string;
+  password: string;
 }
 
 export interface UserRow {
-    id: number,
-    username: string,
-    email: string
+  id: number,
+  username: string,
+  email: string
 }
 
 export interface VerifyEmailParams {
@@ -29,20 +29,32 @@ export interface VerifyEmailParams {
 }
 
 export interface LoginBody {
-    username: string;
-    password: string;
+  username: string;
+  password: string;
 }
 
 export interface TokenPayload {
-    id: number,
-    username: string,
-    is_verified: boolean,
+  id: number,
+  username: string,
+  is_verified: boolean,
 }
 
-export interface ResetPasswordBody  {
-    password: string;
+export interface ResetPasswordBody {
+  password: string;
 }
 
 export interface ForgotPasswordBody {
-    email: string;
+  email: string;
+}
+
+export interface UpdateUserBody {
+  username?: string;
+  last_name?: string;
+  first_name?: string;
+  bio?: string;
+  gender?: 'male' | 'female' | 'other';
+  sexual_preference?: 'male' | 'female' | 'both';
+  latitude?: number;
+  longitude?: number;
+  city?: string;
 }

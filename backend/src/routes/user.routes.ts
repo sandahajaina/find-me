@@ -1,8 +1,10 @@
 import { Router } from "express";
-import { getUser } from "../controllers/user.controller";
+import { getUser, updateMe} from "../controllers/user.controller";
+import { authentifier } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get('/me', getUser);
+router.get('/me', authentifier, getUser);
+router.put('/me', authentifier, updateMe);
 
 export default router;
