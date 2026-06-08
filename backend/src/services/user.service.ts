@@ -53,7 +53,6 @@ export async function updateUser(id: number, data: Partial<UpdateUserBody>) {
     return result.rows[0];
 }
 
-
 // if (data.bio !== undefined) {
 //     fields.push(`bio = $${index}`);
 //     values.push(data.bio);
@@ -99,3 +98,21 @@ export async function updateUser(id: number, data: Partial<UpdateUserBody>) {
 //     values.push(data.city);
 //     index++;
 // }
+
+export async function uploadPhoto(userId: number, filename: string) {
+    const checkPhotoNumber = `
+        SELECT COUNT(*) FROM photos WHERE user_id = $1
+    `;
+    const result = await pool.query(checkPhotoNumber, [userId]);
+    if (parseInt(result.rows[0].count) >= 5)
+        throw new AppError("Maximum photos reached", 400);
+    const isProfilePicture = parseInt(result.rows[0].count) === 0;
+    const imageUrl = `${process.env.BACKEND_URL}/uploads/photos/${filename}`;
+    const updatePhotos = `
+        INSERT INTO photos (user_id, image_url, is_profile_picture)
+        VALUES ($1, $2, $3)
+        RETURNING id, user_id, image_url, is_profile_picture, created_at
+    `;
+    const updated = await pool.query(updatePhotos, [userId, imageUrl,isProfilePicture])
+    return updated.rows[0];
+}

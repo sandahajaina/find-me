@@ -9,6 +9,7 @@ COPY package*.json ./
 
 # 4. Installer les dépendances
 RUN npm install
+RUN mkdir -p /app/uploads/photos
 
 # 5. Copier le reste du code
 COPY . .

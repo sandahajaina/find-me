@@ -60,3 +60,27 @@ export async function updateMe(req: Request<{}, {}, UpdateUserBody>, res: Respon
         });
     }
 }
+
+export async function uploadPhoto(req: Request, res: Response){
+    try {
+        const file = req.file;
+        const id = req.user?.id;
+        if (!file || !id) {
+            return res.status(400).json({
+                message: "no file to upload"
+            });
+        }
+        const photo = await userService.uploadPhoto(id, file.filename);
+        return res.status(201).json({ photo });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
