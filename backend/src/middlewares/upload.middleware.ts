@@ -1,5 +1,6 @@
 import multer, { FileFilterCallback } from 'multer';
 import { Request, Response, NextFunction } from "express";
+import { AppError } from '../utils/AppError';
 
 
 const storage = multer.diskStorage({
@@ -17,7 +18,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
     if (allowedMimeTypes.includes(file.mimetype))
         cb(null, true)
     else {
-        cb(new Error("Invalid file type. Only JPEG, PNG, GIF and WEBP are allowed."))
+        cb(new AppError("Invalid file type. Only JPEG, PNG, GIF and WEBP are allowed.", 400))
     }
 };
 

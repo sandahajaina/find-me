@@ -3,6 +3,9 @@ import cors from "cors";
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes'
 import cookieParser from "cookie-parser";
+import { AppError } from "./utils/AppError";
+import multer from "multer";
+import { Request, Response, NextFunction } from "express";
 
 if (!process.env.FRONTEND_URL)
     throw new Error("FRONTEND_URL is missing");
@@ -21,5 +24,15 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/uploads', express.static('/app/uploads'));
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof AppError) {
+        return res.status(err.statusCode).json({ message: err.message });
+    }
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ message: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+});
 
 export default app;

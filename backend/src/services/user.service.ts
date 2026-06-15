@@ -1,6 +1,7 @@
 import pool from "../config/db";
 import { AppError } from "../utils/AppError";
 import { UpdateUserBody } from "../types";
+import fs from 'fs/promises';
 
 export async function getUserById(id: number) {
     const checkUserQuery = `
@@ -113,6 +114,44 @@ export async function uploadPhoto(userId: number, filename: string) {
         VALUES ($1, $2, $3)
         RETURNING id, user_id, image_url, is_profile_picture, created_at
     `;
-    const updated = await pool.query(updatePhotos, [userId, imageUrl,isProfilePicture])
+    const updated = await pool.query(updatePhotos, [userId, imageUrl, isProfilePicture])
     return updated.rows[0];
+}
+
+export async function deletePhoto(userId: number, photoId: number) {
+    const checkPhoto = `
+        SELECT * FROM photos WHERE id = $1 AND user_id=$2
+    `;
+    const result = await pool.query(checkPhoto, [photoId, userId])
+    if (result.rows.length === 0) {
+        throw new AppError("Picture not found", 404);
+    }
+    const photo = result.rows[0];
+    const filename = photo.image_url.split('/').pop();
+    if (!filename) {
+        throw new AppError("Invalid image URL", 500);
+    }
+    const deletePhotoQuery = `
+        DELETE FROM photos WHERE id = $1
+    `;
+    await pool.query(deletePhotoQuery, [photoId])
+    const filePath = `/app/uploads/photos/${filename}`;
+    try {
+        await fs.unlink(filePath);
+    } catch (error) {
+        console.error(`Failed to delete file ${filePath}:`, error);
+    }
+    if (photo.is_profile_picture) {
+        const remaining = await pool.query(
+            'SELECT id FROM photos WHERE user_id = $1 ORDER BY id ASC LIMIT 1',
+            [userId]
+        );
+        if (remaining.rows.length > 0) {
+            await pool.query(
+                'UPDATE photos SET is_profile_picture = true WHERE id = $1',
+                [remaining.rows[0].id]
+            );
+        }
+    }
+    return { message: "Photo deleted successfully" };
 }

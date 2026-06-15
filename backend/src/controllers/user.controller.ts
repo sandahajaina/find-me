@@ -61,7 +61,7 @@ export async function updateMe(req: Request<{}, {}, UpdateUserBody>, res: Respon
     }
 }
 
-export async function uploadPhoto(req: Request, res: Response){
+export async function uploadPhoto(req: Request, res: Response) {
     try {
         const file = req.file;
         const id = req.user?.id;
@@ -72,6 +72,30 @@ export async function uploadPhoto(req: Request, res: Response){
         }
         const photo = await userService.uploadPhoto(id, file.filename);
         return res.status(201).json({ photo });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
+
+export async function deletePhoto(req: Request, res: Response) {
+    try {
+        const { photoId } = req.params;
+        const id = req.user?.id;
+        if (!photoId || !id) {
+            return res.status(400).json({
+                message: "Photo id not found"
+            });
+        }
+        const result = await userService.deletePhoto(id, parseInt(photoId.toString()));
+        return res.status(200).json({ result });
     } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({
