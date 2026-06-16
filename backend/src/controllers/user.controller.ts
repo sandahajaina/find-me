@@ -94,7 +94,7 @@ export async function deletePhoto(req: Request, res: Response) {
                 message: "Photo id not found"
             });
         }
-        const result = await userService.deletePhoto(id, parseInt(photoId.toString()));
+        const result = await userService.deletePhoto(id, parseInt(photoId as string));
         return res.status(200).json({ result });
     } catch (error) {
         if (error instanceof AppError) {
