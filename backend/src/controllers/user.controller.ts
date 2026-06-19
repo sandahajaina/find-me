@@ -3,6 +3,16 @@ import * as userService from '../services/user.service';
 import { AppError } from "../utils/AppError";
 import { UpdateUserBody } from "../types";
 
+function validateLocation(latitude?: number, longitude?: number): string | null {
+    if (latitude !== undefined && (latitude < -90 || latitude > 90)) {
+        return "Invalid latitude";
+    }
+    if (longitude !== undefined && (longitude < -180 || longitude > 180)) {
+        return "Invalid longitude";
+    }
+    return null;
+}
+
 export async function getUser(req: Request, res: Response) {
     try {
         const id = req.user?.id;
@@ -35,6 +45,12 @@ export async function updateMe(req: Request<{}, {}, UpdateUserBody>, res: Respon
                 message: "id not found"
             });
         }
+
+        const locationError = validateLocation(latitude, longitude);
+        if (locationError) {
+            return res.status(400).json({ message: locationError });
+        }
+
         const data: Partial<UpdateUserBody> = {};
         if (username !== undefined) data.username = username;
         if (first_name !== undefined) data.first_name = first_name;
@@ -109,8 +125,7 @@ export async function deletePhoto(req: Request, res: Response) {
     }
 }
 
-export async function setProfilePicture(req: Request, res: Response)
-{
+export async function setProfilePicture(req: Request, res: Response) {
     try {
         const { photoId } = req.params;
         const id = req.user?.id;
