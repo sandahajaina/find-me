@@ -108,3 +108,28 @@ export async function deletePhoto(req: Request, res: Response) {
         });
     }
 }
+
+export async function setProfilePicture(req: Request, res: Response)
+{
+    try {
+        const { photoId } = req.params;
+        const id = req.user?.id;
+        if (!photoId || !id) {
+            return res.status(400).json({
+                message: "Photo id not found"
+            });
+        }
+        const result = await userService.setProfilePicture(id, parseInt(photoId as string));
+        return res.status(200).json({ result });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}

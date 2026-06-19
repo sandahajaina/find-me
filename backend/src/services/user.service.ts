@@ -155,3 +155,34 @@ export async function deletePhoto(userId: number, photoId: number) {
     }
     return { message: "Photo deleted successfully" };
 }
+
+
+export async function setProfilePicture(userId: number, photoId: number) {
+    const checkPhoto = `
+        SELECT * FROM photos WHERE id = $1 AND user_id=$2
+    `;
+    const result = await pool.query(checkPhoto, [photoId, userId])
+    if (result.rows.length === 0) {
+        throw new AppError("Picture not found", 404);
+    }
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query(
+            'UPDATE photos SET is_profile_picture = false WHERE user_id = $1 AND is_profile_picture = true',
+            [userId]
+        );
+        const updatedPhoto = await client.query(
+            'UPDATE photos SET is_profile_picture = true WHERE id = $1 AND user_id = $2 RETURNING *',
+            [photoId, userId]
+        );
+        await client.query('COMMIT');
+        return updatedPhoto.rows[0];
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
