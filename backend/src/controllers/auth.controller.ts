@@ -27,7 +27,7 @@ function validatePassword(password: string): string | null {
 }
 
 export async function registerUser(
-    req: Request<{}, {}, RegisterBody >, 
+    req: Request<{}, {}, RegisterBody>,
     res: Response
 ): Promise<Response> {
 
@@ -35,7 +35,7 @@ export async function registerUser(
         const { username, email, last_name, first_name, password } = req.body;
 
         if (!username || !email || !last_name || !first_name || !password) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: "Missing fields"
             });
         }
@@ -69,7 +69,7 @@ export async function registerUser(
     } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({
-                message : error.message
+                message: error.message
             });
         }
         console.error(error);
@@ -89,7 +89,7 @@ export async function verifyEmail(req: Request<VerifyEmailParams>, res: Response
             });
         }
         await authService.verifyEmail(token);
-        return res.status(200).json({message: "Email verified successfully"});
+        return res.status(200).json({ message: "Email verified successfully" });
     } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({
@@ -111,7 +111,7 @@ export async function loginUser(req: Request<{}, {}, LoginBody>, res: Response) 
                 message: "Missing fields"
             });
         }
-        const user = await authService.loginUser({username, password});
+        const user = await authService.loginUser({ username, password });
         res.cookie(
             'token', user.tokenJwt, {
             httpOnly: true,
@@ -142,7 +142,7 @@ export async function logoutUser(req: Request, res: Response) {
             httpOnly: true,
             maxAge: 0
         });
-        const {id} = req.user as TokenPayload;
+        const { id } = req.user as TokenPayload;
         if (!id) {
             return res.status(400).json({
                 message: "Missing id"
@@ -167,9 +167,9 @@ export async function logoutUser(req: Request, res: Response) {
 
 export async function forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, res: Response) {
     try {
-        const {email} = req.body;
+        const { email } = req.body;
         if (!email) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: "Missing fields"
             });
         }
@@ -195,12 +195,12 @@ export async function forgotPassword(req: Request<{}, {}, ForgotPasswordBody>, r
     }
 }
 
-export async function resetPassword(req: Request<{token: string}, {}, ResetPasswordBody>, res: Response) {
+export async function resetPassword(req: Request<{ token: string }, {}, ResetPasswordBody>, res: Response) {
     try {
-        const {password} = req.body;
-        const {token} = req.params;
+        const { password } = req.body;
+        const { token } = req.params;
         if (!password) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: "Missing fields"
             });
         }
@@ -218,7 +218,7 @@ export async function resetPassword(req: Request<{token: string}, {}, ResetPassw
         return res.status(200).json({
             message: "Reset password succesfully"
         });
-        
+
     } catch (error) {
         if (error instanceof AppError) {
             return res.status(error.statusCode).json({
