@@ -25,7 +25,7 @@ export interface UserRow {
 }
 
 export interface VerifyEmailParams {
-  token: string;
+  token?: string;
 }
 
 export interface LoginBody {
