@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { AppError } from "./utils/AppError";
 import multer from "multer";
 import { Request, Response, NextFunction } from "express";
+import { sanitizeBody } from "./middlewares/sanitize.middleware";
 
 if (!process.env.FRONTEND_URL)
     throw new Error("FRONTEND_URL is missing");
@@ -14,6 +15,8 @@ if (!process.env.FRONTEND_URL)
 const app = express();
 
 app.use(express.json());
+
+app.use(sanitizeBody);
 
 app.use(cookieParser());
 
