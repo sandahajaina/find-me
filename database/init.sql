@@ -109,6 +109,16 @@ CREATE TABLE reports (
     CONSTRAINT chk_reports_no_self_report CHECK (reporter_id != reported_user_id)
 );
 
+-- matches
+CREATE TABLE matches (
+    id          SERIAL PRIMARY KEY,
+    user1_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user2_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    matched_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_matches_order CHECK (user1_id < user2_id),
+    CONSTRAINT uq_matches UNIQUE (user1_id, user2_id)
+);
+
 -- ============================================================
 -- INDEX
 -- ============================================================

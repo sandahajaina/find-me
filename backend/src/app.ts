@@ -3,6 +3,7 @@ import cors from "cors";
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes'
 import tagRoutes from './routes/tag.routes'
+import likeRoutes from './routes/like.routes'
 import cookieParser from "cookie-parser";
 import { AppError } from "./utils/AppError";
 import multer from "multer";
@@ -28,6 +29,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tags', tagRoutes);
+app.use('/api/likes', likeRoutes);
 app.use('/uploads', express.static('/app/uploads'));
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof AppError) {
