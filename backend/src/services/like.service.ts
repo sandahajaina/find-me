@@ -48,7 +48,7 @@ export async function likeUser(likerId: number, likedUserId: number) {
         );
 
         await client.query(
-            'UPDATE users SET fame_rating = fame_rating + 1 WHERE id = $1',
+            'UPDATE users SET fame_rating = fame_rating + 20 WHERE id = $1',
             [likedUserId]
         );
 
@@ -102,10 +102,9 @@ export async function unlikeUser(likerId: number, likedUserId: number)
         );
 
         await client.query(
-            `UPDATE users SET fame_rating = fame_rating - 1 WHERE id = $1`,
+            `UPDATE users SET fame_rating = fame_rating - 20 WHERE id = $1`,
             [likedUserId]
         );
-
         const user1_id = Math.min(likerId, likedUserId);
         const user2_id = Math.max(likerId, likedUserId);
         await client.query(

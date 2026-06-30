@@ -148,3 +148,28 @@ export async function setProfilePicture(req: Request, res: Response) {
         });
     }
 }
+
+export async function getUserProfile(req: Request, res: Response)
+{
+    try {
+        const { userId } = req.params;
+        const viewerId = req.user?.id;
+        if (!userId || !viewerId) {
+            return res.status(400).json({
+                message: "User id not found"
+            });
+        }
+        const result = await userService.getUserProfile(viewerId, parseInt(userId as string))
+        return res.status(200).json({ result });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}

@@ -186,3 +186,37 @@ export async function setProfilePicture(userId: number, photoId: number) {
     }
 }
 
+export async function getUserProfile(currentUserId: number, targetUserId: number)
+{
+    const isSelfView = currentUserId === targetUserId;
+
+    const checkUserQuery = `
+        SELECT id, username, first_name, last_name, gender, sexual_preference, bio, fame_rating, city, last_seen_at, is_online, created_at
+        FROM users 
+        WHERE id = $1
+    `;
+    const result = await pool.query(checkUserQuery, [targetUserId]);
+    if (result.rows.length === 0) {
+        throw new AppError("User not found", 404);
+    }
+
+    if (!isSelfView)
+    {
+        const checkRecentView = `
+            SELECT id FROM views 
+            WHERE viewer_id = $1 AND viewed_user_id = $2 
+            AND viewed_at > NOW() - INTERVAL '2 hours'
+       `;
+       const recentResult = await pool.query(checkRecentView, [currentUserId, targetUserId])
+       if (recentResult.rows.length === 0)
+       {
+            await pool.query(`INSERT INTO views (viewer_id, viewed_user_id) VALUES ($1, $2)`, [currentUserId, targetUserId]);
+            await pool.query(`UPDATE users SET fame_rating = fame_rating + 1 WHERE id = $1`, [targetUserId]);
+       }
+    }
+
+    const getPhotosQuery = `SELECT id, image_url, is_profile_picture FROM photos WHERE user_id = $1`;
+    const photos = await pool.query(getPhotosQuery, [targetUserId]);
+
+    return { ...result.rows[0], photos: photos.rows };
+}
