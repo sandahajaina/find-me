@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getUser, updateMe, uploadPhoto, deletePhoto, setProfilePicture, getUserProfile} from "../controllers/user.controller";
+import { getUser, updateMe, uploadPhoto, deletePhoto, setProfilePicture, getUserProfile, getSuggestion} from "../controllers/user.controller";
 import { getUserTags, addUserTags, removeUserTag } from "../controllers/tag.controller";
 import { authentifier } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/upload.middleware";
@@ -7,6 +7,7 @@ import { upload } from "../middlewares/upload.middleware";
 const router = Router();
 
 router.get('/me', authentifier, getUser);
+router.get('/suggestions', authentifier, getSuggestion);
 router.get('/:userId', authentifier, getUserProfile);
 router.put('/me', authentifier, updateMe);
 router.post('/me/photos', authentifier, upload.single('photo'), uploadPhoto);

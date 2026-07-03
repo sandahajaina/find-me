@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from '../services/user.service';
+import * as suggestionService from '../services/suggestion.service';
 import { AppError } from "../utils/AppError";
 import { UpdateUserBody } from "../types";
 
@@ -160,6 +161,30 @@ export async function getUserProfile(req: Request, res: Response)
             });
         }
         const result = await userService.getUserProfile(viewerId, parseInt(userId as string))
+        return res.status(200).json({ result });
+    } catch (error) {
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({
+                message: error.message
+            });
+        }
+        console.error(error);
+        return res.status(500).json({
+            message: "Internal server error"
+        });
+    }
+}
+
+export async function getSuggestion(req: Request, res: Response)
+{
+    try {
+        const id = req.user?.id;
+        if (!id) {
+            return res.status(400).json({
+                message: "User id not found"
+            });
+        }
+        const result = await suggestionService.getSuggestions(id)
         return res.status(200).json({ result });
     } catch (error) {
         if (error instanceof AppError) {
