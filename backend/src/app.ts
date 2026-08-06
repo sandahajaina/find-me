@@ -5,6 +5,7 @@ import userRoutes from './routes/user.routes'
 import tagRoutes from './routes/tag.routes'
 import likeRoutes from './routes/like.routes'
 import blockRoutes from './routes/block.routes'
+import reportRoutes from './routes/report.routes'
 import cookieParser from "cookie-parser";
 import { AppError } from "./utils/AppError";
 import multer from "multer";
@@ -32,6 +33,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/likes', likeRoutes);
 app.use('/api/blocks', blockRoutes);
+app.use('/api/reports', reportRoutes);
 app.use('/uploads', express.static('/app/uploads'));
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof AppError) {
