@@ -28,6 +28,7 @@ CREATE TABLE users (
     last_name                   VARCHAR(255) NOT NULL,
     password_hash               VARCHAR(255) NOT NULL,
     gender                      gender_type,
+    birthdate                   DATE,
     sexual_preference           sexual_preference_type,
     bio                         TEXT,
     is_verified                 BOOLEAN NOT NULL DEFAULT FALSE,

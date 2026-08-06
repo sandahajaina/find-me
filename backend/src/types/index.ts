@@ -52,9 +52,19 @@ export interface UpdateUserBody {
   last_name?: string;
   first_name?: string;
   bio?: string;
+  birthdate?: string
   gender?: 'male' | 'female' | 'other';
   sexual_preference?: 'male' | 'female' | 'both';
   latitude?: number;
   longitude?: number;
   city?: string;
+}
+
+export interface SearchFilters {
+    city?: string;
+    age_min?: number;
+    age_max?: number;
+    fame_min?: number;
+    fame_max?: number;
+    tags?: number[];
 }

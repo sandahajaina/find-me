@@ -31,7 +31,7 @@ export async function updateUser(id: number, data: Partial<UpdateUserBody>) {
         }
     }
 
-    const allowedFields = ['username', 'first_name', 'last_name', 'bio', 'gender', 'sexual_preference', 'latitude', 'longitude', 'city'];
+    const allowedFields = ['username', 'first_name', 'last_name', 'bio', 'birthdate', 'gender', 'sexual_preference', 'latitude', 'longitude', 'city'];
 
     for (const field of allowedFields) {
         if (data[field as keyof UpdateUserBody] !== undefined) {
@@ -47,7 +47,7 @@ export async function updateUser(id: number, data: Partial<UpdateUserBody>) {
         UPDATE users
         SET ${fields.join(", ")}
         WHERE id = $${index}
-        RETURNING id, username, email, first_name, last_name, gender, sexual_preference, bio, fame_rating, latitude, longitude, city, last_seen_at, is_online, created_at
+        RETURNING id, username, email, first_name, last_name, gender, sexual_preference, bio, birthdate, fame_rating, latitude, longitude, city, last_seen_at, is_online, created_at
         `;
     values.push(id);
     const result = await pool.query(query, values);

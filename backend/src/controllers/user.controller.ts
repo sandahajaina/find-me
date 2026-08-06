@@ -39,7 +39,7 @@ export async function getUser(req: Request, res: Response) {
 
 export async function updateMe(req: Request<{}, {}, UpdateUserBody>, res: Response) {
     try {
-        const { username, first_name, last_name, bio, gender, sexual_preference, latitude, longitude, city } = req.body;
+        const { username, first_name, last_name, bio, birthdate, gender, sexual_preference, latitude, longitude, city } = req.body;
         const id = req.user?.id;
         if (!id) {
             return res.status(400).json({
@@ -57,6 +57,7 @@ export async function updateMe(req: Request<{}, {}, UpdateUserBody>, res: Respon
         if (first_name !== undefined) data.first_name = first_name;
         if (last_name !== undefined) data.last_name = last_name;
         if (bio !== undefined) data.bio = bio;
+        if (birthdate !== undefined) data.birthdate = birthdate;
         if (gender !== undefined) data.gender = gender;
         if (sexual_preference !== undefined) data.sexual_preference = sexual_preference;
         if (latitude !== undefined) data.latitude = latitude;
